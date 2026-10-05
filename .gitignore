@@ -1,0 +1,3 @@
+node_modules/
+# your own config lives in ~/.config/cprof; never commit one
+profiles.json

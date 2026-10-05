@@ -1,0 +1,23 @@
+{
+  "shareFrom": "work",
+  "shared": [
+    "skills",
+    "commands",
+    "projects"
+  ],
+  "profiles": {
+    "work": {
+      "configDir": null,
+      "mcp": [
+        "playwright",
+        "github"
+      ]
+    },
+    "personal": {
+      "configDir": "~/.claude-personal",
+      "mcp": [
+        "playwright"
+      ]
+    }
+  }
+}

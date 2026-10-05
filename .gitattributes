@@ -1,0 +1,2 @@
+# LF everywhere: a CRLF after the `#!/usr/bin/env bun` shebang breaks the cprof bin on macOS and Linux.
+* text=auto eol=lf

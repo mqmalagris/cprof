@@ -1,0 +1,42 @@
+{
+  "name": "cprof",
+  "version": "0.1.0",
+  "description": "Run Claude Code under several accounts that share skills, commands and memory",
+  "type": "module",
+  "license": "MIT",
+  "author": "Matheus Malagris",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mqmalagris/cprof.git"
+  },
+  "homepage": "https://github.com/mqmalagris/cprof#readme",
+  "bugs": "https://github.com/mqmalagris/cprof/issues",
+  "keywords": [
+    "claude",
+    "claude-code",
+    "cli",
+    "profiles",
+    "accounts",
+    "mcp"
+  ],
+  "bin": {
+    "cprof": "src/cli.ts"
+  },
+  "files": [
+    "src",
+    "profiles.example.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "bun": ">=1.1.0"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.6.0"
+  }
+}
