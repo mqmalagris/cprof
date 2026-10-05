@@ -29,7 +29,7 @@ Claude Code keeps one login per config directory and reads that directory from `
 cprof runs on [Bun](https://bun.sh) (1.1 or newer) and works on Windows, macOS and Linux.
 
 ```bash
-bun add -g cprof
+bun add -g @mqmalagris/cprof
 ```
 
 ## Quick start
