@@ -1,0 +1,73 @@
+name: Release
+
+# Publishes to npm when a version tag (v1.2.3) is pushed, using npm trusted publishing:
+# npm verifies this repo and workflow through GitHub's OIDC token, so no npm token is stored anywhere.
+# Run it manually from the Actions tab to rehearse everything except the publish itself.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun test
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    environment: npm
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      id-token: write # lets npm verify this workflow (trusted publishing) and sign provenance
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check the tag matches package.json and is on main
+        if: github.event_name == 'push'
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "::error::tag ${GITHUB_REF_NAME} doesn't match package.json version ${version}"
+            exit 1
+          fi
+          if ! git merge-base --is-ancestor "${GITHUB_SHA}" origin/main; then
+            echo "::error::${GITHUB_REF_NAME} points at a commit that isn't on main"
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing needs npm 11.5.1 or newer; pinned to 11 so a new major can't break releases.
+      - run: npm install -g npm@^11.5.1 && npm --version
+
+      - name: Publish
+        if: github.event_name == 'push'
+        run: npm publish --access public
+
+      # A dry run only warns when trusted publishing fails, so the verbose log is where to look for the
+      # oidc exchange. It also fails once package.json's version is already published; bump it first.
+      - name: Rehearse (manual run, nothing is published)
+        if: github.event_name == 'workflow_dispatch'
+        run: npm publish --access public --dry-run --loglevel verbose
