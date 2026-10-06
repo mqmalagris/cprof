@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
@@ -37,7 +37,7 @@ jobs:
       contents: read
       id-token: write # lets npm verify this workflow (trusted publishing) and sign provenance
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -54,7 +54,7 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
@@ -67,7 +67,16 @@ jobs:
         run: npm publish --access public
 
       # A dry run only warns when trusted publishing fails, so the verbose log is where to look for the
-      # oidc exchange. It also fails once package.json's version is already published; bump it first.
+      # oidc exchange. npm refuses even a dry run over a version that's already out, so between releases
+      # the rehearsal just shows what would be packed.
       - name: Rehearse (manual run, nothing is published)
         if: github.event_name == 'workflow_dispatch'
-        run: npm publish --access public --dry-run --loglevel verbose
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          if npm view "${name}@${version}" version > /dev/null 2>&1; then
+            echo "::notice::${name}@${version} is already published; bump the version to rehearse a publish"
+            npm pack --dry-run
+          else
+            npm publish --access public --dry-run --loglevel verbose
+          fi
