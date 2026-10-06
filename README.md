@@ -101,6 +101,20 @@ bun test             # unit and end-to-end tests (the CLI runs against a compile
 bun run typecheck
 ```
 
+### Releasing
+
+Releases are published to npm by the [Release workflow](.github/workflows/release.yml) through npm trusted publishing, so no npm token exists anywhere and each version carries a provenance attestation.
+
+1. Bump `version` in `package.json` in a pull request and merge it.
+2. Tag the merge commit on `main` and push the tag:
+   ```bash
+   git checkout main && git pull
+   git tag v0.1.1 && git push origin v0.1.1
+   ```
+3. The workflow runs the tests on all three platforms, checks the tag matches `package.json` and sits on `main`, then publishes.
+
+Run the workflow by hand from the Actions tab to rehearse a release without publishing.
+
 ## License
 
 [MIT](LICENSE)
